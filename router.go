@@ -24,8 +24,8 @@ func PortMap(url string) (port int) {
 	return
 }
 
-// ProxyGet proxies a get request
-func ProxyGet(r *http.Request) (resp *http.Response, err error) {
+// ProxyRequest proxies a get request
+func ProxyRequest(r *http.Request) (resp *http.Response, err error) {
 
 	port := PortMap(r.Host)
 
@@ -44,11 +44,14 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if resp, err := ProxyGet(r); err != nil {
+		if resp, err := ProxyRequest(r); err != nil {
 			fmt.Println(err)
 		} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 			fmt.Println(err)
 		} else {
+			if content_type := resp.Header.Get("Content-Type"); content_type != "" {
+				w.Header().Add("Content-Type", content_type)
+			}
 			fmt.Fprintf(w, string(body))
 		}
 	})
