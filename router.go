@@ -26,9 +26,15 @@ func PortMap(url string) (port int) {
 
 // ProxyGet proxies a get request
 func ProxyGet(r *http.Request) (resp *http.Response, err error) {
+
 	port := PortMap(r.Host)
-	url := fmt.Sprintf("http://0.0.0.0:%v", port)
-	resp, err = http.Get(url)
+
+	context := r.Context()
+	r2 := r.Clone(context)
+	r2.URL.Scheme = "http"
+	r2.URL.Host = fmt.Sprintf("0.0.0.0:%v", port)
+	resp, err = http.DefaultTransport.RoundTrip(r2)
+
 	return resp, err
 }
 
