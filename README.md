@@ -13,8 +13,8 @@ Worse than HA Proxy. Route traffic based on request URI's Host to locally runnin
 New-line separated in the format `%s: %d`
 
 ```
-whatever.org: 9000
+whatever.org:       9000
 nevermind.business: 9001
-anyway.net:  9002
+anyway.net:         9002
 ```
 
