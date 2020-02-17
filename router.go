@@ -9,14 +9,24 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 var version string = "?"
 
-var Map map[string]int = map[string]int{}
+var (
+	MapLock sync.Mutex
+	Map     map[string]int = map[string]int{}
+)
 
 // PortMap returns the map
 func PortMap(url string) (port int) {
+
+	// Maps aren't concurrency safe in go, but I don't they get concurrent read errors,
+	// If they're n ot updated
+	// MapLock.Lock()
+	// defer MapLock.Unlock()
+
 	var ok bool
 	if port, ok = Map[url]; !ok {
 		port = 9999
@@ -26,18 +36,19 @@ func PortMap(url string) (port int) {
 
 // ProxyRequest proxies a get request
 func ProxyRequest(r *http.Request) (resp *http.Response, err error) {
-
 	port := PortMap(r.Host)
 
+	// Clones the request, but shaves the host to something local:PORT
 	context := r.Context()
 	r2 := r.Clone(context)
 	r2.URL.Scheme = "http"
-	r2.URL.Host = fmt.Sprintf("0.0.0.0:%v", port)
-	resp, err = http.DefaultTransport.RoundTrip(r2)
+	r2.URL.Host = fmt.Sprintf("127.0.0.1:%v", port)
+	fmt.Printf("Proxy %v%v to \"%v\"\n", r.Host, r.URL, port)
 
-	return resp, err
+	return http.DefaultTransport.RoundTrip(r2)
 }
 
+// This just parses lines here
 func LoadConfig(file_name string) {
 	fi, err := os.Open(file_name)
 
