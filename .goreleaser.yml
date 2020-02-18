@@ -5,6 +5,7 @@ before:
     - go generate ./...
 builds:
   -
+    id: "router"
     main: ./router.go
     binary: router
     env:

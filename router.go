@@ -108,7 +108,11 @@ func main() {
 			if content_type := resp.Header.Get("Content-Type"); content_type != "" {
 				w.Header().Add("Content-Type", content_type)
 			}
-			fmt.Fprintf(w, string(body))
+			if n, e := w.Write(body); e != nil {
+				fmt.Println(e)
+			} else {
+				fmt.Printf("Received %d bytes, Sent %d bytes\n", len(body), n)
+			}
 		}
 	})
 
